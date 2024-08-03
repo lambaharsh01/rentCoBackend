@@ -10,11 +10,7 @@ const groupSchema = new Schema(
       type: String,
       required: true,
     },
-    createdBy: {
-      type: String,
-      required: true,
-    },
-    memberId: {
+    userEmail: {
       type: String,
       required: true,
     },

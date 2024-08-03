@@ -9,7 +9,7 @@ const memberSchema = new Schema(
     memberEmail: {
       type: String,
     },
-    phoneNumber: {
+    memberPhoneNumber: {
       type: String,
     },
     active: {

@@ -2,19 +2,15 @@ import mongoose, { Schema } from "mongoose";
 
 const groupSchema = new Schema(
   {
-    groupId: {
-      type: String,
-      required: true,
-    },
     groupName: {
       type: String,
       required: true,
     },
-    createdBy: {
+    groupDiscription: {
       type: String,
       required: true,
     },
-    memberId: {
+    userEmail: {
       type: String,
       required: true,
     },

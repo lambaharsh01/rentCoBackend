@@ -9,7 +9,7 @@ const memberSchema = new Schema(
     memberEmail: {
       type: String,
     },
-    phoneNumber: {
+    memberPhoneNumber: {
       type: String,
     },
     active: {
@@ -20,6 +20,9 @@ const memberSchema = new Schema(
       type: String,
     },
     groupId: {
+      type: String,
+    },
+    createdBy: {
       type: String,
     },
     tenancyType: {

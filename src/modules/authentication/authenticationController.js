@@ -1,5 +1,6 @@
 import randomNumber from "../../utils/randomNumber.js";
 import { hashPassword, verifyPassword } from "../../utils/cipher.js";
+import { createToken } from "../../utils/createToken.js";
 import {
   validateSchema,
   initialUserSchema,
@@ -38,7 +39,7 @@ export const sendVerificationCode = async (req, res, next) => {
 
     res.status(200).json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
-    error.statusCode = 401;
+    error.statusCode = 409;
     next(error);
   }
 };
@@ -117,25 +118,36 @@ export const setUserPassword = async (req, res, next) => {
 
 export const loginAuthentication = async (req, res, next) => {
   try {
-    let { userEmail, password } = req.body;
-    console.log(req.body);
+    const { userEmail, password } = req.body;
     if (!userEmail) throw new Error("Email not provided");
     if (!password) throw new Error("Password not provided");
 
-    let userInfo = await req.db.users.findOne({ userEmail });
+    const userInfo = await req.db.users.findOne({ userEmail });
 
     if (!userInfo) throw new Error("User not found");
 
-    let passwordMatch = await verifyPassword({
+    const passwordMatch = await verifyPassword({
       plainText: password,
       hashedValue: userInfo.password,
     });
 
     if (!passwordMatch) throw new Error("Incorrect password");
 
-    return res
-      .status(200)
-      .json({ success: true, message: "User Created Successfully" });
+    const tokenObject = {
+      _id: userInfo._id,
+      userEmail: userInfo.userEmail,
+      gender: userInfo.gender,
+      phoneNumber: userInfo.phoneNumber,
+      userName: userInfo.userName,
+    };
+
+    const token = createToken(tokenObject);
+
+    return res.status(200).json({
+      success: true,
+      message: "User Authenticated Successfully",
+      data: { token, userName: userInfo.userName },
+    });
   } catch (error) {
     next(error);
   }

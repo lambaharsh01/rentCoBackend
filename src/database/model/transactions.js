@@ -18,6 +18,12 @@ const transactionSchema = new Schema(
       type: String,
       required: true,
     },
+    longitude: {
+      type: String,
+    },
+    latitude: {
+      type: String,
+    },
   },
   {
     timestamps: true,

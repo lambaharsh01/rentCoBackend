@@ -2,11 +2,11 @@ import mongoose, { Schema } from "mongoose";
 
 const groupSchema = new Schema(
   {
-    groupId: {
+    groupName: {
       type: String,
       required: true,
     },
-    groupName: {
+    groupDiscription: {
       type: String,
       required: true,
     },

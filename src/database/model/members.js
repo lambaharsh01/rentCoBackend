@@ -22,6 +22,9 @@ const memberSchema = new Schema(
     groupId: {
       type: String,
     },
+    createdBy: {
+      type: String,
+    },
     tenancyType: {
       //shop(commercial), godown(commercial), rooms(residential), floor(residential)
       type: String,

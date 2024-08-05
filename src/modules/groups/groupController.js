@@ -54,20 +54,6 @@ export const getAllGroups = async (req, res, next) => {
       },
     ]);
 
-    let combined = await req.db.groups.aggregate([
-      { $match: { userEmail } },
-      {
-        $lookup: {
-          from: "tenants", // which connlection to connect from groups collection
-          localField: "_id", //Specifies the field from the groups collection to match.
-          foreignField: "groupId", //Specifies the field from the tenants collection to match against localField
-          as: "tenants",
-        },
-      },
-    ]);
-
-    console.log(combined);
-
     return res.status(200).json({
       success: true,
       message: "group created successfully",

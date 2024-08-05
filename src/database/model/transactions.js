@@ -6,12 +6,13 @@ const transactionSchema = new Schema(
       type: String,
       required: true,
     },
-    memberId: {
+    tenantId: {
       type: String,
       required: true,
     },
     groupId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "groups",
       required: true,
     },
     amount: {

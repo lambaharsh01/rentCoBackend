@@ -1,5 +1,3 @@
-import mongoose from "mongoose";
-
 export const createGroup = async (req, res, next) => {
   try {
     let { groupName, groupDiscription } = req.body;
@@ -34,10 +32,10 @@ export const getAllGroups = async (req, res, next) => {
       { $match: { userEmail } },
       {
         $lookup: {
-          from: "members", // which connlection to connect from groups collection
+          from: "tenants", // which connlection to connect from groups collection
           localField: "_id", //Specifies the field from the groups collection to match.
-          foreignField: "groupId", //Specifies the field from the members collection to match against localField
-          as: "members",
+          foreignField: "groupId", //Specifies the field from the tenants collection to match against localField
+          as: "tenants",
         },
       },
       {
@@ -51,10 +49,24 @@ export const getAllGroups = async (req, res, next) => {
               date: "$createdAt",
             },
           },
-          memberCount: { $size: "$members" },
+          tenantCount: { $size: "$tenants" },
         },
       },
     ]);
+
+    let combined = await req.db.groups.aggregate([
+      { $match: { userEmail } },
+      {
+        $lookup: {
+          from: "tenants", // which connlection to connect from groups collection
+          localField: "_id", //Specifies the field from the groups collection to match.
+          foreignField: "groupId", //Specifies the field from the tenants collection to match against localField
+          as: "tenants",
+        },
+      },
+    ]);
+
+    console.log(combined);
 
     return res.status(200).json({
       success: true,
@@ -71,14 +83,13 @@ export const getGroupInfo = async (req, res, next) => {
     let { groupId } = req.query;
 
     let groupInfo = await req.db.groups.aggregate([
-      //mongodb aggrigate alwas return an array
-      { $match: { _id: new mongoose.Types.ObjectId(groupId) } },
+      { $match: { _id: new req.dataTypes.objectId(groupId) } },
       {
         $lookup: {
-          from: "members", // which connlection to connect from groups collection
+          from: "tenants", // which connlection to connect from groups collection
           localField: "_id", //Specifies the field from the groups collection to match.
-          foreignField: "groupId", //Specifies the field from the members collection to match against localField
-          as: "members",
+          foreignField: "groupId", //Specifies the field from the tenants collection to match against localField
+          as: "tenants",
         },
       },
       {
@@ -92,8 +103,8 @@ export const getGroupInfo = async (req, res, next) => {
               date: "$createdAt",
             },
           },
-          members: 1,
-          memberCount: { $size: "$members" },
+          tenants: 1,
+          tenantCount: { $size: "$tenants" },
         },
       },
     ]);

@@ -25,7 +25,6 @@ export const validTenant = async (req, res, next) => {
     );
 
     if (preExistingTenant) {
-      console.log(preExistingTenant);
       let message = `${preExistingTenant.tenantName} has similar details.`;
       if (preExistingTenant.tenantPhoneNumber === tenantInfo.tenantPhoneNumber)
         message = `${preExistingTenant.tenantName} in this group has similar phone number`;

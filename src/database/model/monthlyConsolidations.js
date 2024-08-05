@@ -31,7 +31,7 @@ const monthlyConsolidationSchema = new Schema(
       type: Number,
       required: true,
     },
-    memberId: {
+    tenantId: {
       type: Number,
       required: true,
     },

@@ -2,19 +2,16 @@ import mongoose, { Schema } from "mongoose";
 
 const groupAdministratorSchema = new Schema(
   {
-    groupId: {
-      type: String,
-      required: true,
-    },
+    groupId: { type: Schema.Types.ObjectId, ref: "groups", required: true },
     userId: {
       type: String,
       required: true,
     },
-    role: { //admin 
+    role: {
+      //admin
       type: String,
       required: true,
     },
-
   },
   {
     timestamps: true,

@@ -89,7 +89,18 @@ export const getGroupInfo = async (req, res, next) => {
               date: "$createdAt",
             },
           },
-          tenants: 1,
+          tenants: {
+            $map: {
+              input: "$tenants",
+              as: "tenant",
+              in: {
+                tenantName: "$$tenant.tenantName",
+                tenantPhoneNumber: "$$tenant.tenantPhoneNumber",
+                rentAmount: "$$tenant.rentAmount",
+                tenantPicture: "$$tenant.tenantPicture",
+              },
+            },
+          },
           tenantCount: { $size: "$tenants" },
         },
       },

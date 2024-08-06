@@ -43,6 +43,13 @@ const tenantSchema = new Schema(
       type: Number,
       required: true,
     },
+    propertyName: {
+      type: String,
+      required: true,
+    },
+    propertyAddress: {
+      type: String,
+    },
     aadhaarNumber: {
       type: String,
     },

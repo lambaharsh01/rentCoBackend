@@ -1,8 +1,6 @@
 export const validTenant = async (req, res, next) => {
   try {
-    const tenantInfo = Object.fromEntries(
-      Object.entries(req.body).filter(([key, value]) => value)
-    );
+    let tenantInfo = req.body;
 
     tenantInfo.createdBy = req.user.userEmail;
 
@@ -21,7 +19,7 @@ export const validTenant = async (req, res, next) => {
 
     let preExistingTenant = await req.db.tenants.findOne(
       preExistingTenantQuery,
-      "_id tenantName tenantEmail tenantPhoneNumber"
+      "_id tenantName tenantEmail tenantPhoneNumber tenantBackupPhoneNumber"
     );
 
     if (preExistingTenant) {
@@ -33,13 +31,22 @@ export const validTenant = async (req, res, next) => {
         preExistingTenant.tenantBackupPhoneNumber ===
         tenantInfo.tenantPhoneNumber
       )
-        message = `${preExistingTenant.tenantName} in this group has same backup phone number as this one's main number`;
+        message = `${preExistingTenant.tenantName} in this group has same backup phone number as current tenent's main number`;
 
       if (preExistingTenant.tenantEmail === tenantInfo.tenantEmail)
         message = `${preExistingTenant.tenantName} in this group has same email ID`;
 
       throw new Error(message);
     }
+
+    // authentication completed creating user now
+
+    tenantInfo = Object.fromEntries(
+      Object.entries(req.body).filter(([key, value]) => value)
+    );
+
+    if (!tenantInfo.tenantPicture)
+      tenantInfo.tenantPicture = "/dummyUserImage.png";
 
     await req.db.tenants.create(tenantInfo);
 

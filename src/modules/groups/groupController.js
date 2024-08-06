@@ -117,3 +117,18 @@ export const getGroupInfo = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteGroup = async (req, res, next) => {
+  try {
+    let { groupId } = req.params;
+
+    await req.db.groups.deleteOne({ _id: new req.dataTypes.objectId(groupId) });
+
+    return res.status(200).json({
+      success: true,
+      message: "group created successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

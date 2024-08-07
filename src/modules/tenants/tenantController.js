@@ -58,3 +58,18 @@ export const validTenant = async (req, res, next) => {
     next(error);
   }
 };
+
+export const softDeleteTenant = async (req, res, next) => {
+  try {
+    let { tenantId } = req.params;
+
+    await req.db.tenants.findByIdAndUpdate(tenantId, { active: false });
+
+    return res.status(200).json({
+      success: true,
+      message: "Tenant is inactivated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

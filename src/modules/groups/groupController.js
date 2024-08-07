@@ -29,7 +29,7 @@ export const getAllGroups = async (req, res, next) => {
     let { userEmail } = req.user;
 
     let groups = await req.db.groups.aggregate([
-      { $match: { userEmail } },
+      { $match: { userEmail, active: true } },
       {
         $lookup: {
           from: "tenants", // which connlection to connect from groups collection
@@ -37,6 +37,9 @@ export const getAllGroups = async (req, res, next) => {
           foreignField: "groupId", //Specifies the field from the tenants collection to match against localField
           as: "tenants",
         },
+      },
+      {
+        $match: { "tenants.active": true },
       },
       {
         $project: {
@@ -69,7 +72,7 @@ export const getGroupInfo = async (req, res, next) => {
     let { groupId } = req.query;
 
     let groupInfo = await req.db.groups.aggregate([
-      { $match: { _id: new req.dataTypes.objectId(groupId) } },
+      { $match: { _id: new req.dataTypes.objectId(groupId), active: true } },
       {
         $lookup: {
           from: "tenants", // which connlection to connect from groups collection
@@ -90,10 +93,22 @@ export const getGroupInfo = async (req, res, next) => {
             },
           },
           tenants: {
+            //apply function on tenants
+            $filter: {
+              input: "$tenants", //filters tenants array
+              as: "tenant", //alias for filterations
+              cond: { $eq: ["$$tenant.active", true] }, //confition applied
+            },
+            $filter: {
+              input: "$tenants", //filters tenants array
+              as: "tenant", //alias for filterations
+              cond: { $eq: ["$$tenant.active", true] }, //confition applied
+            },
             $map: {
-              input: "$tenants",
-              as: "tenant",
+              input: "$tenants", //maps through tenants array
+              as: "tenant", // alias for mapping
               in: {
+                //gets the attributes metiones in in rejects the rest
                 tenantName: "$$tenant.tenantName",
                 tenantPhoneNumber: "$$tenant.tenantPhoneNumber",
                 rentAmount: "$$tenant.rentAmount",
@@ -118,15 +133,33 @@ export const getGroupInfo = async (req, res, next) => {
   }
 };
 
-export const deleteGroup = async (req, res, next) => {
+export const softDeleteGroup = async (req, res, next) => {
   try {
     let { groupId } = req.params;
 
-    await req.db.groups.deleteOne({ _id: new req.dataTypes.objectId(groupId) });
+    await req.db.groups.findByIdAndUpdate(groupId, { active: false });
 
     return res.status(200).json({
       success: true,
-      message: "group created successfully",
+      message: "Group inactivated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateGroup = async (req, res, next) => {
+  try {
+    let { groupName, groupDiscription, groupId } = req.body;
+
+    await req.db.groups.findByIdAndUpdate(groupId, {
+      groupName,
+      groupDiscription,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Group Updated Successfully",
     });
   } catch (error) {
     next(error);

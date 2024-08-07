@@ -4,12 +4,14 @@ import {
   createGroup,
   getAllGroups,
   getGroupInfo,
-  deleteGroup,
+  softDeleteGroup,
+  updateGroup,
 } from "./groupController.js";
 
 router.post("/createGroup", createGroup);
 router.get("/getAllGroups", getAllGroups);
 router.get("/getGroupInfo", getGroupInfo);
-router.delete("/deleteGroup/:groupId", deleteGroup);
+router.delete("/softDeleteGroup/:groupId", softDeleteGroup);
+router.put("/updateGroup", updateGroup);
 
 export default router;

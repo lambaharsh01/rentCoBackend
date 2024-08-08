@@ -1,28 +1,5 @@
-export const createGroup = async (req, res, next) => {
-  try {
-    let { groupName, groupDiscription } = req.body;
+FILTERATION AND MAPING IN MONGO DB
 
-    groupName = groupName.trim();
-    let { userEmail } = req.user;
-
-    let existingGroup = await req.db.groups.findOne(
-      { userEmail, groupName },
-      "_id"
-    );
-
-    if (existingGroup)
-      throw new Error("Another group exists with the same name");
-
-    await req.db.groups.create({ groupName, groupDiscription, userEmail });
-
-    return res.status(200).json({
-      success: true,
-      message: "group created successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const getAllGroups = async (req, res, next) => {
   try {
@@ -49,6 +26,14 @@ export const getAllGroups = async (req, res, next) => {
               date: "$createdAt",
             },
           },
+          tenants: {
+            //apply function on tenants
+            $filter: {
+              input: "$tenants", //filters tenants array
+              as: "tenant", //alias for filterations
+              cond: { $eq: ["$$tenant.active", true] }, //confition applied
+            },
+          },
           tenantCount: { $size: "$tenants" },
         },
       },
@@ -69,12 +54,12 @@ export const getGroupInfo = async (req, res, next) => {
     let { groupId } = req.query;
 
     let groupInfo = await req.db.groups.aggregate([
-      { $match: { _id: new req.dataTypes.objectId(groupId) } },
+      { $match: { _id: new req.dataTypes.objectId(groupId), active: true } },
       {
         $lookup: {
-          from: "tenants", // which connlection to connect from groups collection
-          localField: "_id", //Specifies the field from the groups collection to match.
-          foreignField: "groupId", //Specifies the field from the tenants collection to match against localField
+          from: "tenants",
+          localField: "_id",
+          foreignField: "groupId",
           as: "tenants",
         },
       },
@@ -89,13 +74,20 @@ export const getGroupInfo = async (req, res, next) => {
               date: "$createdAt",
             },
           },
+          // filteration could be done in a map phele input me filtration krr doo vo map tk jayga he refine hoo k
           tenants: {
             $map: {
-              input: "$tenants", //maps through tenants array
+              input: {
+                $filter: {
+                  input: "$tenants",
+                  as: "tenant",
+                  cond: { $eq: ["$$tenant.active", true] },
+                },
+              },
+              //  "$tenants", //maps through tenants array
               as: "tenant", // alias for mapping
               in: {
                 //gets the attributes metiones in in rejects the rest
-                _id: "$$tenant._id",
                 tenantName: "$$tenant.tenantName",
                 tenantPhoneNumber: "$$tenant.tenantPhoneNumber",
                 rentAmount: "$$tenant.rentAmount",
@@ -114,39 +106,6 @@ export const getGroupInfo = async (req, res, next) => {
       success: true,
       message: "group created successfully",
       data: { groupInfo: groupInfo[0] },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteGroup = async (req, res, next) => {
-  try {
-    let { groupId } = req.params;
-
-    await req.db.groups.findByIdAndDelete(groupId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Group inactivated successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateGroup = async (req, res, next) => {
-  try {
-    let { groupName, groupDiscription, groupId } = req.body;
-
-    await req.db.groups.findByIdAndUpdate(groupId, {
-      groupName,
-      groupDiscription,
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Group Updated Successfully",
     });
   } catch (error) {
     next(error);

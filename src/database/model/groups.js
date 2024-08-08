@@ -6,6 +6,10 @@ const groupSchema = new Schema(
       type: String,
       required: true,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
     groupDiscription: {
       type: String,
       required: true,

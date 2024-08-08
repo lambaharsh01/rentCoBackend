@@ -1,4 +1,4 @@
-export const validTenant = async (req, res, next) => {
+export const addTenant = async (req, res, next) => {
   try {
     let tenantInfo = req.body;
 
@@ -59,15 +59,56 @@ export const validTenant = async (req, res, next) => {
   }
 };
 
-export const softDeleteTenant = async (req, res, next) => {
+export const deleteTenant = async (req, res, next) => {
   try {
     let { tenantId } = req.params;
 
-    await req.db.tenants.findByIdAndUpdate(tenantId, { active: false });
+    await req.db.tenants.findByIdAndUpdate(tenantId, {
+      active: false,
+      groupId: null,
+    });
 
     return res.status(200).json({
       success: true,
       message: "Tenant is inactivated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTenantInfo = async (req, res, next) => {
+  try {
+    let { tenantId } = req.query;
+
+    let tenantInfo = await req.db.tenants.findById(tenantId);
+
+    if (!tenantInfo) throw new Error("No Tenant Found");
+
+    return res.status(200).json({
+      success: true,
+      message: "Tenant's Data fetched",
+      data: { tenantInfo },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editTenant = async (req, res, next) => {
+  try {
+    let tenantInfo = req.body;
+    let { tenantId } = req.query;
+
+    tenantInfo = Object.fromEntries(
+      Object.entries(req.body).filter(([key, value]) => value)
+    );
+
+    await req.db.tenants.findByIdAndUpdate(tenantId, tenantInfo);
+
+    return res.status(200).json({
+      success: true,
+      message: "tenant edited successfully",
     });
   } catch (error) {
     next(error);

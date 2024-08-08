@@ -39,9 +39,6 @@ export const getAllGroups = async (req, res, next) => {
         },
       },
       {
-        $match: { "tenants.active": true },
-      },
-      {
         $project: {
           // kinda group by but better
           _id: 1,
@@ -72,7 +69,7 @@ export const getGroupInfo = async (req, res, next) => {
     let { groupId } = req.query;
 
     let groupInfo = await req.db.groups.aggregate([
-      { $match: { _id: new req.dataTypes.objectId(groupId), active: true } },
+      { $match: { _id: new req.dataTypes.objectId(groupId) } },
       {
         $lookup: {
           from: "tenants", // which connlection to connect from groups collection
@@ -93,22 +90,12 @@ export const getGroupInfo = async (req, res, next) => {
             },
           },
           tenants: {
-            //apply function on tenants
-            $filter: {
-              input: "$tenants", //filters tenants array
-              as: "tenant", //alias for filterations
-              cond: { $eq: ["$$tenant.active", true] }, //confition applied
-            },
-            $filter: {
-              input: "$tenants", //filters tenants array
-              as: "tenant", //alias for filterations
-              cond: { $eq: ["$$tenant.active", true] }, //confition applied
-            },
             $map: {
               input: "$tenants", //maps through tenants array
               as: "tenant", // alias for mapping
               in: {
                 //gets the attributes metiones in in rejects the rest
+                _id: "$$tenant._id",
                 tenantName: "$$tenant.tenantName",
                 tenantPhoneNumber: "$$tenant.tenantPhoneNumber",
                 rentAmount: "$$tenant.rentAmount",
@@ -133,11 +120,11 @@ export const getGroupInfo = async (req, res, next) => {
   }
 };
 
-export const softDeleteGroup = async (req, res, next) => {
+export const deleteGroup = async (req, res, next) => {
   try {
     let { groupId } = req.params;
 
-    await req.db.groups.findByIdAndUpdate(groupId, { active: false });
+    await req.db.groups.findByIdAndDelete(groupId);
 
     return res.status(200).json({
       success: true,

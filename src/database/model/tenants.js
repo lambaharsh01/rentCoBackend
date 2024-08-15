@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-// const { Schema } = mongoose;
 
 const tenantSchema = new Schema(
   {
@@ -40,6 +39,14 @@ const tenantSchema = new Schema(
       required: true,
     },
     rentAmount: {
+      type: Number,
+      required: true,
+    },
+    electricityBillApplicable: {
+      type: Boolean,
+      required: true,
+    },
+    electricityAmount: {
       type: Number,
       required: true,
     },

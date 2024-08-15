@@ -41,8 +41,18 @@ export const addTenant = async (req, res, next) => {
 
     // authentication completed creating user now
 
+    const skipKeysThatCouldBeFalsy = [
+      "electricityBillApplicable",
+      "electricityAmount",
+    ];
+
     tenantInfo = Object.fromEntries(
-      Object.entries(req.body).filter(([key, value]) => value)
+      Object.entries(req.body).filter(([key, value]) => {
+        if (skipKeysThatCouldBeFalsy.includes(key)) {
+          return true;
+        }
+        return Boolean(value);
+      })
     );
 
     if (!tenantInfo.tenantPicture)
@@ -100,8 +110,18 @@ export const editTenant = async (req, res, next) => {
     let tenantInfo = req.body;
     let { tenantId } = req.query;
 
+    const skipKeysThatCouldBeFalsy = [
+      "electricityBillApplicable",
+      "electricityAmount",
+    ];
+
     tenantInfo = Object.fromEntries(
-      Object.entries(req.body).filter(([key, value]) => value)
+      Object.entries(req.body).filter(([key, value]) => {
+        if (skipKeysThatCouldBeFalsy.includes(key)) {
+          return true;
+        }
+        return Boolean(value);
+      })
     );
 
     await req.db.tenants.findByIdAndUpdate(tenantId, tenantInfo);

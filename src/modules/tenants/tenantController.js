@@ -134,3 +134,42 @@ export const editTenant = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getAllTenants = async (req, res, next) => {
+  try {
+    let tenantDetails = await req.db.groups.aggregate([
+      { $match: { userEmail: req.user.userEmail, active: true } },
+      {
+        $lookup: {
+          from: "tenants",
+          localField: "_id",
+          foreignField: "groupId",
+          as: "tenants",
+        },
+      },
+      {
+        $unwind: "$tenants",
+      },
+      {
+        $project: {
+          _id: 0,
+          groupId: "$_id",
+          tenantId: "$tenants._id",
+          tenantName: "$tenants.tenantName",
+          tenantPhoneNumber: "$tenants.tenantPhoneNumber",
+          rentAmount: "$tenants.rentAmount",
+          electricityAmount: "$tenants.electricityAmount",
+          propertyName: "$tenants.propertyName",
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Tenant's Data fetched",
+      data: { tenantDetails },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

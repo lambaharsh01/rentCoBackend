@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const transactionSchema = new Schema(
   {
-    userId: {
+    userId: { // email o who collected
       type: String,
       required: true,
     },

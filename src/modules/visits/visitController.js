@@ -1,31 +1,51 @@
+import { addVisitSchema } from "../../utils/validtionSchemas.js";
+
 export const addVisit = async (req, res, next) => {
   try {
-    console.log(req.body);
+    if (!addVisitSchema(req.body)) throw new Error("Validation Failed!");
 
-    //     {
-    //   groupId: '66b4f82939da0ae17cae8b5b',
-    //   tenantId: '66bda64fa7b7ca5756415182',
-    //   tenantName: 'Harsh2',
-    //   tenantPhoneNumber: '8287568558',
-    //   propertyName: 'Room2',
-    //   rentAmount: 2000,
-    //   electricityAmountPerUnit: 0,
-    //   previousReading: 'N/A',
-    //   currentReading: 'N/A',
-    //   totalUnits: 'N/A',
-    //   electricityBill: 'N/A',
-    //   previouslyPending: true,
-    //   previouslyPendingAmount: 10000,
-    //   damages: false,
-    //   damagesExplained: '',
-    //   remark: '',
-    //   currentMonthTotalRent: 2000,
-    //   totalRent: 12000
-    // }
+    let visitObject = { ...req.body, userEmail: req.user.userEmail };
+
+    let confirmation = visitObject.confirmation;
+
+    let existingVisitEntery = await req.db.visits.findOne(
+      {
+        tenantId: new req.dataTypes.objectId(visitObject.tenantId),
+        visitDate: new Date(visitObject.visitDate),
+      },
+      { _id: 1 }
+    );
+
+    if (!confirmation && existingVisitEntery) {
+      return res.status(200).json({
+        success: false,
+        message: `Entery already exists for ${
+          visitObject.tenantName
+        } on ${visitObject.visitDate
+          .split("-")
+          .reverse()
+          .join("-")} would you like to replace it?`,
+      });
+    }
+
+    if (visitObject.confirmation) {
+      let deleted = await req.db.visits.deleteOne({
+        tenantId: new req.dataTypes.objectId(visitObject.tenantId),
+        visitDate: new Date(visitObject.visitDate),
+      });
+
+      console.log(deleted);
+
+      delete visitObject.confirmation;
+    }
+
+    await req.db.visits.create(visitObject);
 
     return res.status(200).json({
       success: true,
-      message: "vist saved successfully",
+      message: `Visit entery created for ${
+        visitObject.tenantName
+      } on ${visitObject.visitDate.split("-").reverse().join("-")}`,
     });
   } catch (error) {
     next(error);

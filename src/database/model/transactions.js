@@ -2,12 +2,13 @@ import mongoose, { Schema } from "mongoose";
 
 const transactionSchema = new Schema(
   {
-    userId: { // email o who collected
+    userEmail: {
       type: String,
       required: true,
     },
     tenantId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "tenants",
       required: true,
     },
     groupId: {
@@ -15,15 +16,32 @@ const transactionSchema = new Schema(
       ref: "groups",
       required: true,
     },
-    amount: {
+    tenantName: {
       type: String,
       required: true,
     },
-    longitude: {
+    tenantPhoneNumber: {
       type: String,
     },
-    latitude: {
+    propertyName: {
       type: String,
+      required: true,
+    },
+    paymentMethod: {
+      type: String,
+      required: true,
+    },
+    paymentType: {
+      type: String,
+      required: true,
+    },
+    transactionDate: {
+      type: Date,
+      required: true,
+    },
+    recivedAmount: {
+      type: Number,
+      required: true,
     },
   },
   {

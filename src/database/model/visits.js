@@ -32,18 +32,22 @@ const visitSchema = new Schema(
       type: Number,
       required: true,
     },
+    visitDate: {
+      type: Date,
+      required: true,
+    },
     electricityAmountPerUnit: {
       // N/A
       type: Number,
     },
     previousReading: {
-      type: Number,
+      type: String,
     },
     currentReading: {
-      type: Number,
+      type: String,
     },
     totalUnits: {
-      type: Number,
+      type: String,
     },
     electricityBill: {
       type: Number,

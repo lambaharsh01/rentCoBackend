@@ -34,8 +34,6 @@ export const addVisit = async (req, res, next) => {
         visitDate: new Date(visitObject.visitDate),
       });
 
-      console.log(deleted);
-
       delete visitObject.confirmation;
     }
 
@@ -52,13 +50,68 @@ export const addVisit = async (req, res, next) => {
   }
 };
 
-export const getPendingVisits = async (req, res, next) => {
+export const getVisits = async (req, res, next) => {
   try {
-    console.log(req.query);
+    let { fromDate, toDate, tenantId } = req.query;
+
+    let queryObject = { userEmail: req.user.userEmail };
+
+    if (fromDate || toDate) {
+      let visitDate = {};
+      if (fromDate) visitDate.$gte = new Date(fromDate);
+      if (toDate) visitDate.$lte = new Date(toDate);
+
+      queryObject = { ...queryObject, visitDate };
+    }
+
+    if (tenantId) {
+      queryObject = {
+        ...queryObject,
+        tenantId: new req.dataTypes.objectId(tenantId),
+      };
+    }
+
+    let filteredVisits = await req.db.visits
+      .aggregate([
+        { $match: queryObject },
+        {
+          $project: {
+            tenantPhoneNumber: 1,
+            propertyName: 1,
+            totalRent: 1,
+            visitDate: {
+              $dateToString: {
+                format: "%d %b",
+                date: "$visitDate",
+              },
+            },
+          },
+        },
+      ])
+      .sort({ visitDate: "asc" });
 
     return res.status(200).json({
       success: true,
-      message: "group created successfully",
+      message: "Visits fetched successfully",
+      data: { filteredVisits },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getVisitInfo = async (req, res, next) => {
+  try {
+    let { visitId } = req.query;
+
+    let visit = await req.db.visits.findById(visitId);
+
+    if (!visit) throw new Error("Visit not found");
+
+    return res.status(200).json({
+      success: true,
+      message: "Visit fetched successfully",
+      data: { visit },
     });
   } catch (error) {
     next(error);

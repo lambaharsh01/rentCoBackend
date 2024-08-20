@@ -191,7 +191,6 @@ export const getAllTenantsWithImage = async (req, res, next) => {
       },
       {
         $project: {
-          _id: 0,
           tenantId: "$tenants._id",
           tenantName: "$tenants.tenantName",
           tenantPhoneNumber: "$tenants.tenantPhoneNumber",

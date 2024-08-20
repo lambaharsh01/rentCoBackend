@@ -41,28 +41,45 @@ export const getTransactions = async (req, res, next) => {
     }
 
     let filteredTransactions = await req.db.transactions
-      .find(queryObject, {
-        tenantName: 1,
-        propertyName: 1,
-        tenantPhoneNumber: 1,
-        paymentMethod: 1,
-        recivedAmount: 1,
-        paymentType: 1,
-        transactionDate: {
-          $dateToString: {
-            format: "%d-%m-%Y",
-            date: "$transactionDate",
+      .aggregate([
+        { $match: queryObject },
+        {
+          $project: {
+            tenantName: 1,
+            propertyName: 1,
+            recivedAmount: 1,
+            transactionDate: {
+              $dateToString: {
+                format: "%d %b",
+                date: "$transactionDate",
+              },
+            },
           },
         },
-      })
+      ])
       .sort({ transactionDate: "asc" });
-
-    console.log(filteredTransactions);
 
     return res.status(200).json({
       success: true,
       message: "Transactions fetched successfully",
       data: { filteredTransactions },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTransactionInfo = async (req, res, next) => {
+  try {
+    let { transactionId } = req.query;
+
+    let transaction = await req.db.transactions.findById(transactionId);
+
+    if (!transaction) throw new Error("Visit not found");
+    return res.status(200).json({
+      success: true,
+      message: "Transaction fetched successfully",
+      data: { transaction },
     });
   } catch (error) {
     next(error);

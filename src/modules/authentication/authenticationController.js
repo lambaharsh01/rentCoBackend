@@ -1,6 +1,9 @@
 import randomNumber from "../../utils/randomNumber.js";
 import { hashPassword, verifyPassword } from "../../utils/cipher.js";
 import { createToken } from "../../utils/createToken.js";
+
+import { mailTransport } from "../../utils/mailer.js";
+
 import {
   validateSchema,
   initialUserSchema,
@@ -19,7 +22,22 @@ export const sendVerificationCode = async (req, res, next) => {
 
     let otp = randomNumber();
 
-    console.log(otp);
+    let mailObject = {
+      from: {
+        name: "rentCo",
+        address: process.env.GMAIL_USER,
+      },
+      to: userEmail,
+      subject: "OTP For rentCo SignUp",
+      text: `${otp} is yor sign up OTP for RentCo.`,
+    };
+
+    await new Promise((resolve, reject) => {
+      mailTransport().sendMail(mailObject, (error, info) => {
+        if (error) reject(error);
+        resolve(info);
+      });
+    });
 
     let createUser = {
       ...validatedUser,

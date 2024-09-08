@@ -117,3 +117,22 @@ export const getVisitInfo = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getLastVisitInfo = async (req, res, next) => {
+  try {
+    let { tenantId } = req.query;
+
+    let lastVisit = await req.db.visits
+      .findOne({ tenantId })
+      .sort({ visitDate: -1 })
+      .limit(1);
+
+    return res.status(200).json({
+      success: true,
+      message: "Last visit fetched successfully",
+      data: { lastVisit },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

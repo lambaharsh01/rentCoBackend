@@ -7,7 +7,7 @@ const dbConnection = async () => {
 
     await mongoose.connect(process.env.CONNECTION_STRING, {
       autoIndex: false,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 15000,
       socketTimeoutMS: 45000,
       family: 4,
       maxPoolSize: 20,

@@ -122,15 +122,34 @@ export const getLastVisitInfo = async (req, res, next) => {
   try {
     let { tenantId } = req.query;
 
-    let lastVisit = await req.db.visits
+    const lastVisit = await req.db.visits
       .findOne({ tenantId })
       .sort({ visitDate: -1 })
       .limit(1);
 
+    if (!lastVisit) throw new Error("No last visit found");
+
+    const recivedAmountQuery = await req.db.transactions.aggregate([
+      {
+        $match: {
+          transactionDate: { $gte: new Date(lastVisit.visitDate) },
+          tenantId: new req.dataTypes.objectId(tenantId),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalReceivedAmount: { $sum: "$recivedAmount" },
+        },
+      },
+    ]);
+
+    const recivedAmount = recivedAmountQuery?.[0]?.totalReceivedAmount ?? 0;
+
     return res.status(200).json({
       success: true,
       message: "Last visit fetched successfully",
-      data: { lastVisit },
+      data: { lastVisit, recivedAmount },
     });
   } catch (error) {
     next(error);
